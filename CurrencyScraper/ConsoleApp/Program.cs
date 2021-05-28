@@ -9,6 +9,8 @@ namespace ConsoleApp
     class Program
     {
         private static List<string> currencies = new List<string>();
+        private static Currency currencyObj = new Currency();
+        private static List<Currency> currencyObjList = new List<Currency>();
 
         static void Main(string[] args)
         {
@@ -39,6 +41,7 @@ namespace ConsoleApp
 
                 ScrapeCurrencyDataFromStream(readCurrencyStream);
 
+                Console.WriteLine("================= NEXT PAGE ===========");
             }
 
             // Releases the resources of the response.
@@ -82,54 +85,25 @@ namespace ConsoleApp
 
         private static void ScrapeCurrencyDataFromStream(StreamReader readStream)
         {
-            int trCounter = 0;
-
+            int i = 0;
             while (true)
             {
                 string line = readStream.ReadLine();
 
                 if (line == null)
                     break;
-
-                if (line.Contains("<tr>"))
+  
+                if (line.Contains("class=\"hui12_20\""))
                 {
-                    if(trCounter > 2) 
-                    { 
-                        List<string> row = new List<string>();
+                    int startIndex = line.IndexOf(">");
+                    int endIndex = GetNthIndex(line, "<", 2);
+                    string value = line.Substring(startIndex + 1, endIndex - startIndex - 1);
 
-                        for (int i = 0; i < 7; i++) 
-                        {
-                            string currentReadingLine = readStream.ReadLine().Trim();
-                            if (currentReadingLine != "")
-                            {
-                                row.Add(currentReadingLine);
-                            }
-                            else {
-                                i--;
-                            }
-                        }
+                    AddCurrencyProperty(ref currencyObj, value, i);
+                    i++;
 
-                        Currency currencyObj = new Currency();
-
-                        for (int i = 0; i < row.Count; i++) 
-                        {
-                            if (row[i].Contains("class=\"hui12_20\""))
-                            {
-                                int startIndex = row[i].IndexOf(">");
-                                int endIndex = GetNthIndex(row[i], "<", 2);
-                                string value = row[i].Substring(startIndex + 1, endIndex - startIndex - 1);
-
-                                AddCurrencyProperty(ref currencyObj, value, i);
-                            }
-                        }
-
-                        PrintCurrency(currencyObj);
-                    }
-
-                    trCounter++;
+                    if (i > 6) i = 0;
                 }
-
-                Console.Write(line + "\n");
             }
         }
 
@@ -174,6 +148,8 @@ namespace ConsoleApp
                     break;
                 case 6:
                     currencyObj.PubTime = value;
+                    currencyObjList.Add(new Currency(currencyObj));
+                    PrintCurrency(currencyObj);
                     break;
             }
         }
@@ -186,7 +162,7 @@ namespace ConsoleApp
             Console.Write(currency.SellingRate + ", ");
             Console.Write(currency.CashSellingRate + ", ");
             Console.Write(currency.MiddleRate + ", ");
-            Console.Write(currency.PubTime + "\n ");
+            Console.Write(currency.PubTime + "\n");
             Console.WriteLine("============================================================");
         }
     }
