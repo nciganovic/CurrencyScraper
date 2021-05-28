@@ -8,6 +8,22 @@ namespace ConsoleApp
 {
     public class Currency
     {
+        public Currency()
+        {
+
+        }
+
+        public Currency(Currency currency)
+        {
+            CurrencyName = currency.CurrencyName;
+            BuyingRate = currency.BuyingRate;
+            CashBuyingRate = currency.CashBuyingRate;
+            SellingRate = currency.SellingRate;
+            CashSellingRate = currency.CashSellingRate;
+            MiddleRate = currency.MiddleRate;
+            PubTime = currency.PubTime;
+        }
+
         public string CurrencyName { get; set; }
         public string BuyingRate { get; set; }
         public string  CashBuyingRate { get; set; }
