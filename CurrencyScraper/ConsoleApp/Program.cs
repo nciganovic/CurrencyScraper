@@ -2,11 +2,14 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
 
 namespace ConsoleApp
 {
     class Program
     {
+        private static List<string> currencies = new List<string>();
+
         static void Main(string[] args)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://srh.bankofchina.com/search/whpj/searchen.jsp");
@@ -17,8 +20,12 @@ namespace ConsoleApp
             StreamReader readStream = new StreamReader(receiveStream, encode);
 
             //ReadResponseStream(readStream);
+            FindCurrenciesInStream(readStream);
 
-            ReadStramLines(readStream);
+            foreach (string c in currencies) 
+            { 
+                
+            }
 
             // Releases the resources of the response.
             response.Close();
@@ -27,32 +34,29 @@ namespace ConsoleApp
             Console.WriteLine("Hello World!");
         }
 
-        private static void ReadResponseStream(StreamReader readStream) {
-            Console.WriteLine("\r\nResponse stream received.");
-            Char[] read = new Char[256];
-            // Reads 256 characters at a time.
-            int count = readStream.Read(read, 0, 256);
-            Console.WriteLine("HTML...\r\n");
-            while (count > 0)
+        private static void FindCurrenciesInStream(StreamReader readStream) {
+            
+            while (true) 
             {
-                // Dumps the 256 characters on a string and displays the string to the console.
-                String str = new String(read, 0, count);
-                Console.Write(str);
-                count = readStream.Read(read, 0, 256);
-            }
-            Console.WriteLine("");
-        }
+                string line = readStream.ReadLine();
 
-        private static void ReadStramLines(StreamReader readStram) {
-            bool reading = true;
-            while (reading) {
-                string line = readStram.ReadLine();
-                Console.Write(line + "\n");
-                if (line == null) {
-                    reading = false;
+                if (line == null)
+                {
+                    break;
                 }
+
+                if (line.Contains("<option value=\"")) {
+                    int startIndex = line.IndexOf("\"");
+                    string currency = line.Substring(startIndex + 1, 3);
+                    currencies.Add(currency);
+                }
+
+                Console.Write(line + "\n");
+                
             }
 
+            currencies.RemoveAt(0);
         }
+
     }
 }
