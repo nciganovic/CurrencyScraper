@@ -150,7 +150,7 @@ namespace ConsoleApp
                 case 6:
                     currencyObj.PubTime = value;
                     currencyObjList.Add(new Currency(currencyObj));
-                    PrintCurrency(currencyObj);
+                    Currency.PrintCurrency(currencyObj);
                     break;
             }
         }
@@ -178,18 +178,6 @@ namespace ConsoleApp
 
         private static string CreateFileName(DateTime startDate, DateTime endDate, string currencyName) {
             return startDate.ToString("yyyy-MM-dd") + "_" + endDate.ToString("yyyy-MM-dd") + "_" + currencyName + ".csv";
-        }
-
-        private static void PrintCurrency(Currency currency) {
-            Console.WriteLine("============================================================");
-            Console.Write(currency.CurrencyName + ", ");
-            Console.Write(currency.BuyingRate + ", ");
-            Console.Write(currency.CashBuyingRate + ", ");
-            Console.Write(currency.SellingRate + ", ");
-            Console.Write(currency.CashSellingRate + ", ");
-            Console.Write(currency.MiddleRate + ", ");
-            Console.Write(currency.PubTime + "\n");
-            Console.WriteLine("============================================================");
         }
     }
 }
