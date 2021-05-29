@@ -16,12 +16,7 @@ namespace ConsoleApp
         {
             string baseUrl = "https://srh.bankofchina.com/search/whpj/searchen.jsp";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(baseUrl);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            Stream receiveStream = response.GetResponseStream();
-            Encoding encode = Encoding.GetEncoding("utf-8");
-            StreamReader readStream = new StreamReader(receiveStream, encode);
+            StreamReader readStream = CreateStreamFromUrl(baseUrl);
 
             //ReadResponseStream(readStream);
             FindCurrenciesInStream(readStream);
@@ -33,21 +28,20 @@ namespace ConsoleApp
             {
                 string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + c;
 
-                HttpWebRequest requestCurrency = (HttpWebRequest)WebRequest.Create(searchUrl);
-                HttpWebResponse responseCurrency = (HttpWebResponse)requestCurrency.GetResponse();
+                StreamReader readCurrencyStream = CreateStreamFromUrl(searchUrl);
 
-                Stream receiveCurrencyStream = responseCurrency.GetResponseStream();
-                StreamReader readCurrencyStream = new StreamReader(receiveCurrencyStream, encode);
+                int totalRows = GetTotalRowsNumber(readCurrencyStream);
 
                 ScrapeCurrencyDataFromStream(readCurrencyStream);
+
+                readCurrencyStream.Close();
 
                 Console.WriteLine("================= NEXT PAGE ===========");
             }
 
-            // Releases the resources of the response.
-            response.Close();
-            // Releases the resources of the Stream.
+            // Releases the resources of the stream.
             readStream.Close();
+
             Console.WriteLine("Hello World!");
         }
 
@@ -107,6 +101,30 @@ namespace ConsoleApp
             }
         }
 
+        private static int GetTotalRowsNumber(StreamReader readStream) 
+        {
+            int i = 0;
+
+            while (true)
+            {
+                string line = readStream.ReadLine();
+
+                if (line == null)
+                    break;
+
+                if (line.Contains("m_nRecordCount"))
+                {
+                    int startIndex = line.IndexOf("=");
+                    int endIndex = line.IndexOf(";");
+                    string value = line.Substring(startIndex + 2, endIndex - startIndex - 2);
+                    i = Convert.ToInt32(value);
+                    break;
+                }
+            }
+
+            return i;
+        }
+
         private static int GetNthIndex(string s, string t, int n)
         {
             int count = 0;
@@ -152,6 +170,16 @@ namespace ConsoleApp
                     PrintCurrency(currencyObj);
                     break;
             }
+        }
+
+        private static StreamReader CreateStreamFromUrl(string url) {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            Stream receiveStream = response.GetResponseStream();
+            Encoding encode = Encoding.GetEncoding("utf-8");
+            StreamReader readStream = new StreamReader(receiveStream, encode);
+            return readStream;
         }
 
         private static void PrintCurrency(Currency currency) {
