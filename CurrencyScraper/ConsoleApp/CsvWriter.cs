@@ -16,22 +16,33 @@ namespace ConsoleApp
 
             bool fileExists = File.Exists(path);
 
-            using (var w = new StreamWriter(path, fileExists)) // writer will either create new file or append on existing one if is found on given location
+            try
             {
-                //If doesn't exist then add header values for csv
-                if (!fileExists)
+                using (var w = new StreamWriter(path, fileExists)) // writer will either create new file or append on existing one if is found on given location
                 {
-                    w.WriteLine("CurrencyName,BuyingRate,CashBuyingRate,SellingRate,CashSellingRate,MiddleRate,PubTime");
-                    w.Flush();
-                }
+                    //If doesn't exist then add header values for csv
+                    if (!fileExists)
+                    {
+                        w.WriteLine("CurrencyName,BuyingRate,CashBuyingRate,SellingRate,CashSellingRate,MiddleRate,PubTime");
+                        w.Flush();
+                    }
 
-                foreach (var r in records)
-                {
-                    var line = string.Format("{0},{1},{2},{3},{4},{5},{6}"
-                        , r.CurrencyName, r.BuyingRate, r.CashBuyingRate, r.SellingRate, r.CashSellingRate, r.MiddleRate, r.PubTime);
-                    w.WriteLine(line);
-                    w.Flush();
+                    foreach (var r in records)
+                    {
+                        var line = string.Format("{0},{1},{2},{3},{4},{5},{6}"
+                            , r.CurrencyName, r.BuyingRate, r.CashBuyingRate, r.SellingRate, r.CashSellingRate, r.MiddleRate, r.PubTime);
+                        w.WriteLine(line);
+                        w.Flush();
+                    }
                 }
+            }
+            catch (DirectoryNotFoundException exp)
+            {
+                Console.WriteLine("Error: FilePath provided in App.config doesn't exist");
+                Environment.Exit(0);
+            }
+            catch (Exception exp) {
+                Console.WriteLine(exp.Message);
             }
         }
 
