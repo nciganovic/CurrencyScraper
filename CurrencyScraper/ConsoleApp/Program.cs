@@ -8,7 +8,7 @@ namespace ConsoleApp
 {
     class Program
     {
-        private static List<string> currencies = new List<string>();
+        private static List<string> currencyNames = new List<string>();
         private static Currency currencyObj = new Currency();
         private static List<Currency> currencyObjList = new List<Currency>();
 
@@ -17,40 +17,38 @@ namespace ConsoleApp
             string baseUrl = "https://srh.bankofchina.com/search/whpj/searchen.jsp";
 
             StreamReader getAllCurrenciesStream = CreateStreamFromUrl(baseUrl);
-            FindCurrenciesInStream(getAllCurrenciesStream);
+            ScrapeCurrencyNamesInStream(getAllCurrenciesStream);
             getAllCurrenciesStream.Close();
+
+            Console.WriteLine($"{currencyNames.Count} currencies found!");
 
             DateTime startDate = GetTwoDaysAgoDate();
             DateTime endDate = DateTime.Now;
 
-            Console.WriteLine($"{currencies.Count} currencies found!");
-
-            foreach (string c in currencies)
+            foreach (string currencyName in currencyNames)
             {
-                int index = currencies.FindIndex(a => a == c) + 1;
+                int index = currencyNames.FindIndex(x => x == currencyName) + 1;
 
-                string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + c;
+                string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + currencyName;
 
                 StreamReader readTotalRowCountStream = CreateStreamFromUrl(searchUrl);
-                int totalRows = GetTotalRowsNumber(readTotalRowCountStream);
+                int totalRows = ScrapeTotalRowsNumber(readTotalRowCountStream);
                 int totalPages = GetTotalPagesNumber(totalRows);
                 readTotalRowCountStream.Close();
 
                 for (int page = 1; page <= totalPages; page++) 
                 {
-                    Console.WriteLine($"=========== {c} {index}/{currencies.Count} start page {page}/{totalPages}   rows {totalRows} ===========");
+                    Console.WriteLine($"=========== {currencyName} {index}/{currencyNames.Count} start page {page}/{totalPages}   rows {totalRows} ===========");
 
                     string searchEachPageUrl = searchUrl + $"&page={page}";
 
                     StreamReader readCurrencyValueStream = CreateStreamFromUrl(searchEachPageUrl);
-
                     ScrapeCurrencyDataFromStream(readCurrencyValueStream);
-
                     readCurrencyValueStream.Close();
                 }
 
                 //Write values to CSV
-                string fileName = startDate.ToString("yyyy-MM-dd") + "_" + endDate.ToString("yyyy-MM-dd") + "_" + c;
+                string fileName = CreateFileName(startDate, endDate, currencyName);
                 CsvWriter.WriteToCsv(currencyObjList, fileName);
 
                 currencyObjList.Clear();
@@ -65,7 +63,7 @@ namespace ConsoleApp
             return new DateTime(twoDaysBeaforeTicks);
         }
 
-        private static void FindCurrenciesInStream(StreamReader readStream) {
+        private static void ScrapeCurrencyNamesInStream(StreamReader readStream) {
 
             while (true)
             {
@@ -79,11 +77,12 @@ namespace ConsoleApp
                 if (line.Contains("<option value=\"")) {
                     int startIndex = line.IndexOf("\"");
                     string currency = line.Substring(startIndex + 1, 3);
-                    currencies.Add(currency);
+                    currencyNames.Add(currency);
                 }
             }
 
-            currencies.RemoveAt(0);
+            //Remove first element that is 'Select the currency'
+            currencyNames.RemoveAt(0);
         }
 
         private static void ScrapeCurrencyDataFromStream(StreamReader readStream)
@@ -99,7 +98,7 @@ namespace ConsoleApp
                 if (line.Contains("class=\"hui12_20\""))
                 {
                     int startIndex = line.IndexOf(">");
-                    int endIndex = GetNthIndex(line, "<", 2);
+                    int endIndex = line.GetNthIndex('<', 2);
                     string value = line.Substring(startIndex + 1, endIndex - startIndex - 1);
 
                     AddCurrencyProperty(ref currencyObj, value, i);
@@ -110,7 +109,7 @@ namespace ConsoleApp
             }
         }
 
-        private static int GetTotalRowsNumber(StreamReader readStream) 
+        private static int ScrapeTotalRowsNumber(StreamReader readStream) 
         {
             int i = 0;
 
@@ -132,23 +131,6 @@ namespace ConsoleApp
             }
 
             return i;
-        }
-
-        private static int GetNthIndex(string s, string t, int n)
-        {
-            int count = 0;
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (s[i].ToString() == t)
-                {
-                    count++;
-                    if (count == n)
-                    {
-                        return i;
-                    }
-                }
-            }
-            return -1;
         }
 
         private static void AddCurrencyProperty(ref Currency currencyObj, string value, int i)
@@ -200,6 +182,10 @@ namespace ConsoleApp
                 totalPages++;
             }
             return totalPages;
+        }
+
+        private static string CreateFileName(DateTime startDate, DateTime endDate, string currencyName) {
+            return startDate.ToString("yyyy-MM-dd") + "_" + endDate.ToString("yyyy-MM-dd") + "_" + currencyName + ".csv";
         }
 
         private static void PrintCurrency(Currency currency) {
