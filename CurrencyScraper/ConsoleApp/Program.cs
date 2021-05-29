@@ -28,13 +28,23 @@ namespace ConsoleApp
             {
                 string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + c;
 
-                StreamReader readCurrencyStream = CreateStreamFromUrl(searchUrl);
+                StreamReader readTotalRowCountStream = CreateStreamFromUrl(searchUrl);
+                int totalRows = GetTotalRowsNumber(readTotalRowCountStream);
+                int totalPages = GetTotalPagesNumber(totalRows);
+                readTotalRowCountStream.Close();
 
-                int totalRows = GetTotalRowsNumber(readCurrencyStream);
+                for (int page = 1; page <= totalPages; page++) 
+                {
+                    string searchEachPageUrl = searchUrl + $"&page={page}";
 
-                ScrapeCurrencyDataFromStream(readCurrencyStream);
+                    StreamReader readCurrencyValueStream = CreateStreamFromUrl(searchEachPageUrl);
 
-                readCurrencyStream.Close();
+                    ScrapeCurrencyDataFromStream(readCurrencyValueStream);
+
+                    readCurrencyValueStream.Close();
+                }
+
+
 
                 Console.WriteLine("================= NEXT PAGE ===========");
             }
@@ -180,6 +190,17 @@ namespace ConsoleApp
             Encoding encode = Encoding.GetEncoding("utf-8");
             StreamReader readStream = new StreamReader(receiveStream, encode);
             return readStream;
+        }
+
+        private static int GetTotalPagesNumber(int numberOfRows, int rowsPerPage = 20) 
+        {
+            int totalPages = 0;   
+            while (numberOfRows > 0) 
+            {
+                numberOfRows -= rowsPerPage;
+                totalPages++;
+            }
+            return totalPages;
         }
 
         private static void PrintCurrency(Currency currency) {
