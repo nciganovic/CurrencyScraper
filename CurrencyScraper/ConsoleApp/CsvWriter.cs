@@ -12,9 +12,7 @@ namespace ConsoleApp
     {
         public static void WriteToCsv(List<Currency> records, string fileName)
         {
-            //string path = GetFilePathFromConfig() + "/" + fileName + ".csv";
-
-            string path = Path.Combine(GetFilePathFromConfig(), fileName + ".csv");
+            string path = Path.Combine(GetFilePathFromConfig(), fileName);
 
             bool fileExists = File.Exists(path);
 
