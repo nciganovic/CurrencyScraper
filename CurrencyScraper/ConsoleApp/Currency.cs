@@ -24,6 +24,7 @@ namespace ConsoleApp
             PubTime = currency.PubTime;
         }
 
+        //Setting all values to string becase I will not use this values for anything except to write them on csv file.
         public string CurrencyName { get; set; }
         public string BuyingRate { get; set; }
         public string CashBuyingRate { get; set; }

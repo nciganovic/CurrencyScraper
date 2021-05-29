@@ -10,6 +10,7 @@ namespace ConsoleApp
     {
         public static int GetNthIndex(this string s, char characterToFind, int n)
         {
+            //Get n-th appearance of char in string
             int count = 0;
             for (int i = 0; i < s.Length; i++)
             {

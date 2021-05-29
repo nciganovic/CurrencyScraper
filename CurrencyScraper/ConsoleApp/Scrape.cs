@@ -78,6 +78,9 @@ namespace ConsoleApp
                     int endIndex = line.GetNthIndex('<', 2);
                     string value = line.Substring(startIndex + 1, endIndex - startIndex - 1);
 
+                    //Since there are 7 different values for scraping i need to know to what property to assign value
+                    //So for that reason I am using counter 'i' to track what property is next for value
+
                     AddCurrencyProperty(ref currencyObj, value, i);
                     
                     i++;

@@ -16,6 +16,7 @@ namespace ConsoleApp
         {
             string baseUrl = "https://srh.bankofchina.com/search/whpj/searchen.jsp";
 
+            // Get values like GBP, USD, HKD etc...
             StreamReader getAllCurrencyNamesStream = CreateStream.FromUrl(baseUrl);
             currencyNames = Scrape.GetCurrencyNamesFromStream(getAllCurrencyNamesStream);
             getAllCurrencyNamesStream.Close();
@@ -31,6 +32,7 @@ namespace ConsoleApp
 
                 string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + currencyName;
 
+                // Get total rows current currency has in order to calculate the number of pages
                 StreamReader readTotalRowCountStream = CreateStream.FromUrl(searchUrl);
                 int totalRows = Scrape.GetTotalRowsNumberFromStream(readTotalRowCountStream);
                 int totalPages = GetTotalPagesNumber(totalRows);
@@ -42,6 +44,7 @@ namespace ConsoleApp
 
                     string searchEachPageUrl = searchUrl + $"&page={page}";
 
+                    // Get currency values for every row of page and add them to object and list
                     StreamReader readCurrencyValueStream = CreateStream.FromUrl(searchEachPageUrl);
                     Scrape.GetCurrencyValuesFromStream(readCurrencyValueStream, ref currencyObj, ref currencyObjList);
                     readCurrencyValueStream.Close();
