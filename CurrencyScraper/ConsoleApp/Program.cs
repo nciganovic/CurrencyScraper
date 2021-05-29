@@ -22,7 +22,7 @@ namespace ConsoleApp
 
             Console.WriteLine($"{currencyNames.Count} currencies found!");
 
-            DateTime startDate = GetTwoDaysAgoDate();
+            DateTime startDate = DateTime.Now.TwoDaysAgo();
             DateTime endDate = DateTime.Now;
 
             foreach (string currencyName in currencyNames)
@@ -53,14 +53,6 @@ namespace ConsoleApp
 
                 currencyObjList.Clear();
             }
-        }
-
-        private static DateTime GetTwoDaysAgoDate()
-        {
-            long currentTicks = DateTime.Now.Ticks;
-            long twoDayTicks = DateTime.Now.AddDays(2).Ticks - currentTicks;
-            long twoDaysBeaforeTicks = currentTicks - twoDayTicks;
-            return new DateTime(twoDaysBeaforeTicks);
         }
 
         private static void ScrapeCurrencyNamesInStream(StreamReader readStream) {

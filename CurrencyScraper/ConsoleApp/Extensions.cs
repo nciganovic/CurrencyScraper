@@ -24,5 +24,13 @@ namespace ConsoleApp
             }
             return -1;
         }
+
+        public static DateTime TwoDaysAgo(this DateTime date)
+        {
+            long currentTicks = date.Ticks;
+            long twoDayTicks = date.AddDays(2).Ticks - currentTicks;
+            long twoDaysBeaforeTicks = currentTicks - twoDayTicks;
+            return new DateTime(twoDaysBeaforeTicks);
+        }
     }
 }
