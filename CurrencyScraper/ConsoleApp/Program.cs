@@ -23,8 +23,12 @@ namespace ConsoleApp
             DateTime startDate = GetTwoDaysAgoDate();
             DateTime endDate = DateTime.Now;
 
+            Console.WriteLine($"{currencies.Count} currencies found!");
+
             foreach (string c in currencies)
             {
+                int index = currencies.FindIndex(a => a == c) + 1;
+
                 string searchUrl = baseUrl + $"?erectDate={startDate.ToString("yyyy-MM-dd")}&nothing={endDate.ToString("yyyy-MM-dd")}&pjname=" + c;
 
                 StreamReader readTotalRowCountStream = CreateStreamFromUrl(searchUrl);
@@ -34,6 +38,8 @@ namespace ConsoleApp
 
                 for (int page = 1; page <= totalPages; page++) 
                 {
+                    Console.WriteLine($"=========== {c} {index}/{currencies.Count} start page {page}/{totalPages}   rows {totalRows} ===========");
+
                     string searchEachPageUrl = searchUrl + $"&page={page}";
 
                     StreamReader readCurrencyValueStream = CreateStreamFromUrl(searchEachPageUrl);
@@ -48,8 +54,6 @@ namespace ConsoleApp
                 CsvWriter.WriteToCsv(currencyObjList, fileName);
 
                 currencyObjList.Clear();
-
-                Console.WriteLine("================= NEXT PAGE ===========");
             }
         }
 
