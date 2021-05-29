@@ -16,10 +16,9 @@ namespace ConsoleApp
         {
             string baseUrl = "https://srh.bankofchina.com/search/whpj/searchen.jsp";
 
-            StreamReader readStream = CreateStreamFromUrl(baseUrl);
-
-            //ReadResponseStream(readStream);
-            FindCurrenciesInStream(readStream);
+            StreamReader getAllCurrenciesStream = CreateStreamFromUrl(baseUrl);
+            FindCurrenciesInStream(getAllCurrenciesStream);
+            getAllCurrenciesStream.Close();
 
             DateTime startDate = GetTwoDaysAgoDate();
             DateTime endDate = DateTime.Now;
@@ -44,15 +43,14 @@ namespace ConsoleApp
                     readCurrencyValueStream.Close();
                 }
 
+                //Write values to CSV
+                string fileName = startDate.ToString("yyyy-MM-dd") + "_" + endDate.ToString("yyyy-MM-dd") + "_" + c;
+                CsvWriter.WriteToCsv(currencyObjList, fileName);
 
+                currencyObjList.Clear();
 
                 Console.WriteLine("================= NEXT PAGE ===========");
             }
-
-            // Releases the resources of the stream.
-            readStream.Close();
-
-            Console.WriteLine("Hello World!");
         }
 
         private static DateTime GetTwoDaysAgoDate()
@@ -79,9 +77,6 @@ namespace ConsoleApp
                     string currency = line.Substring(startIndex + 1, 3);
                     currencies.Add(currency);
                 }
-
-                Console.Write(line + "\n");
-
             }
 
             currencies.RemoveAt(0);
