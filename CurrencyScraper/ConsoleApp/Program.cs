@@ -38,7 +38,7 @@ namespace ConsoleApp
 
                 for (int page = 1; page <= totalPages; page++) 
                 {
-                    Console.WriteLine($"=========== {currencyName} {index}/{currencyNames.Count} start page {page}/{totalPages}   rows {totalRows} ===========");
+                    Console.WriteLine($"=========== {currencyName} {index}/{currencyNames.Count} start page {page}/{totalPages} ,rows {totalRows} ===========");
 
                     string searchEachPageUrl = searchUrl + $"&page={page}";
 
