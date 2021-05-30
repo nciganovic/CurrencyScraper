@@ -41,6 +41,7 @@ namespace ConsoleApp
                 if (totalPages == 0)
                 {
                     Console.WriteLine($"Failed to find total pages for {currencyName}, skipping to next one...");
+                    continue;
                 }
 
                 for (int page = 1; page <= totalPages; page++)
