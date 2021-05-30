@@ -38,9 +38,14 @@ namespace ConsoleApp
                 int totalPages = GetTotalPagesNumber(totalRows);
                 readTotalRowCountStream.Close();
 
-                for (int page = 1; page <= totalPages; page++) 
+                if (totalPages == 0)
                 {
-                    Console.WriteLine($"=========== {currencyName} {index}/{currencyNames.Count} start page {page}/{totalPages} ,rows {totalRows} ===========");
+                    Console.WriteLine($"Failed to find total pages for {currencyName}, skipping to next one...");
+                }
+
+                for (int page = 1; page <= totalPages; page++)
+                {
+                    Console.WriteLine($"=========== {currencyName} {index}/{currencyNames.Count} start page {page}/{totalPages} ,total rows {totalRows} ===========");
 
                     string searchEachPageUrl = searchUrl + $"&page={page}";
 
@@ -48,13 +53,20 @@ namespace ConsoleApp
                     StreamReader readCurrencyValueStream = CreateStream.FromUrl(searchEachPageUrl);
                     Scrape.GetCurrencyValuesFromStream(readCurrencyValueStream, ref currencyObj, ref currencyObjList);
                     readCurrencyValueStream.Close();
+
+                    if (currencyObjList.Count > 0)
+                    {
+                        //Write values to CSV
+                        Console.WriteLine(currencyObjList.Count + " rows found!");
+                        string fileName = CreateFileName(startDate, endDate, currencyName);
+                        CsvWriter.WriteToCsv(currencyObjList, fileName);
+                        currencyObjList.Clear();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Nothing found.");
+                    }
                 }
-
-                //Write values to CSV
-                string fileName = CreateFileName(startDate, endDate, currencyName);
-                CsvWriter.WriteToCsv(currencyObjList, fileName);
-
-                currencyObjList.Clear();
             }
         }
 
