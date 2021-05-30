@@ -89,7 +89,7 @@ namespace ConsoleApp
                     {
                         i = 0;
                         currencyObjList.Add(new Currency(currencyObj));
-                        Currency.PrintCurrency(currencyObj);
+                        //Currency.PrintCurrency(currencyObj);
                     }
                     
                 }
